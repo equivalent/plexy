@@ -42,3 +42,6 @@
 
 # Machine-specific symlink to the daisyui gem (created by bin/setup).
 /vendor/daisyui-src
+
+# Production database password (referenced by .kamal/secrets).
+/.kamal/plexy_database_password
