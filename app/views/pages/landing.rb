@@ -7,6 +7,8 @@ class Views::Pages::Landing < Views::Base
 
   def view_template
     div(class: "min-h-screen flex flex-col items-center justify-center gap-8 bg-base-200 py-12") do
+      render Components::CartSummary.new
+
       div(class: "flex flex-wrap justify-center gap-8 max-w-6xl") do
         @products.each do |product|
           render Components::ProductCard.new(product: product)

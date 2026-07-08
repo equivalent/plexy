@@ -19,10 +19,12 @@ class Components::ProductCard < Components::Base
 
   def buy_now
     CartProduct.add(@product)
+    reply.replace.also(Components::CartSummary.new)
   end
 
   def increment
     CartProduct.add(@product)
+    reply.replace.also(Components::CartSummary.new)
   end
 
   def decrement
@@ -34,6 +36,7 @@ class Components::ProductCard < Components::Base
     else
       cart_product.destroy!
     end
+    reply.replace.also(Components::CartSummary.new)
   end
 
   def view_template
