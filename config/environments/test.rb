@@ -6,6 +6,10 @@
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 
+  # Jobs are captured in memory during tests; the pgmq schema isn't present in the
+  # test database (schema.rb can't represent it), so don't use the pgbus adapter here.
+  config.active_job.queue_adapter = :test
+
   # While tests run files are not watched, reloading is not necessary.
   config.enable_reloading = false
 

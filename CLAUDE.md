@@ -1,10 +1,11 @@
 # Plexy
 
-Rails 8.1.3 app on Ruby 4.0.5 (rbenv). No JS bundler — importmaps + Hotwire (Turbo/Stimulus). Propshaft asset pipeline, Solid Cache/Queue/Cable, Kamal for deploys.
+Rails 8.1.3 app on Ruby 4.0.5 (rbenv). No JS bundler — importmaps + Hotwire (Turbo/Stimulus). Propshaft asset pipeline, Solid Cache/Cable, pgbus for jobs, Kamal for deploys.
 
 ## Tech stack
 
-- **Database**: PostgreSQL (`pg` gem). Local DBs: `plexy_development` / `plexy_test`. Production uses a multi-database layout (`primary` + `cache`/`queue`/`cable` for the Solid gems) and expects `PLEXY_DATABASE_PASSWORD` or `DATABASE_URL`.
+- **Database**: PostgreSQL (`pg` gem). Local DBs: `plexy_development` / `plexy_test`. Production uses a multi-database layout (`primary` + `cache`/`cable` for the Solid gems) and expects `PLEXY_DATABASE_PASSWORD` or `DATABASE_URL`.
+- **Background jobs**: [pgbus](https://pgbus.zoolutions.llc) (PGMQ-backed ActiveJob adapter + event bus), replacing Solid Queue. Configured in `config/initializers/pgbus.rb`; adapter set in `config/application.rb`. Workers run via `bin/pgbus start` (a `jobs` process in `Procfile.dev`). Dashboard mounted at `/pgbus` (needs auth before production exposure). The pgmq schema was installed by the pgbus migration in **embedded mode** (Homebrew Postgres has no pgmq extension) — it lives in the dev DB but is NOT in `schema.rb`, so the test DB has no pgmq schema; tests therefore use the `:test` ActiveJob adapter (`config/environments/test.rb`) and `Pgbus::Testing::MinitestHelpers` fake mode (`test/test_helper.rb`). A fresh database needs `bin/rails db:migrate` (not just schema load) to get pgmq installed.
 - **Views**: Phlex (`phlex-rails`), not ERB. Components live in `app/components/` under the `Components::` namespace (a `Phlex::Kit`); full pages live in `app/views/` under `Views::`. Both namespaces are registered in `config/initializers/phlex.rb`. Base classes: `Components::Base` (< `Phlex::HTML`) and `Views::Base` (< `Components::Base`).
 - **UI components**: `daisyui` gem (DaisyUI components as Phlex classes, docs: https://daisyui.phlex.fun). `DaisyUI` is included in `Components::Base`, so short-form syntax works everywhere: `Button(:primary) { "Save" }`, `Card(:base_100) { |card| card.body { ... } }`.
 - **CSS**: Tailwind v4 (CSS-based config in `app/assets/tailwind/application.css` — there is no `tailwind.config.js`) via `tailwindcss-rails`.
@@ -36,6 +37,6 @@ The plain `tailwindcss-ruby` binary does NOT include the DaisyUI plugin. We use
 ## Dev workflow
 
 - `bin/setup` — installs gems, downloads `bin/tailwindcss`, prepares DBs, starts `bin/dev`.
-- `bin/dev` — Puma + Tailwind watcher (Foreman via `Procfile.dev`).
+- `bin/dev` — Puma + Tailwind watcher + pgbus worker (Foreman via `Procfile.dev`).
 - `bin/rails test` — test suite.
 - `.claude.json` in the repo configures the `daisyui` MCP server (`bundle exec daisyui-mcp`) for component documentation lookup.
