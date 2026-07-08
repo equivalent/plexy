@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "daisyui": {
+      "command": "bundle",
+      "args": ["exec", "daisyui-mcp"]
+    }
+  }
+}

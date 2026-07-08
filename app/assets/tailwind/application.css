@@ -1,1 +1,8 @@
 @import "tailwindcss";
+
+/* DaisyUI plugin — bundled in the tailwind-cli-extra binary (bin/tailwindcss) */
+@plugin "daisyui";
+
+/* Scan the DaisyUI gem's Phlex components for Tailwind/DaisyUI classes.
+   Update this path when the gem version changes (see `bundle show daisyui`). */
+@source "/Users/t/.rbenv/versions/4.0.5/lib/ruby/gems/4.0.0/gems/daisyui-1.2.1/**/*.rb";

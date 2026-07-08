@@ -15,6 +15,17 @@ FileUtils.chdir APP_ROOT do
   puts "== Installing dependencies =="
   system("bundle check") || system!("bundle install")
 
+  # TailwindCSS standalone CLI bundled with DaisyUI (see config/boot.rb).
+  # https://github.com/dobicinaitis/tailwind-cli-extra
+  unless File.exist?("bin/tailwindcss")
+    puts "\n== Downloading tailwind-cli-extra (TailwindCSS + DaisyUI) =="
+    arch = RUBY_PLATFORM.include?("arm64") || RUBY_PLATFORM.include?("aarch64") ? "arm64" : "x64"
+    os = RUBY_PLATFORM.include?("darwin") ? "macos" : "linux"
+    url = "https://github.com/dobicinaitis/tailwind-cli-extra/releases/download/v2.9.4/tailwindcss-extra-#{os}-#{arch}"
+    system! "curl -sL -o bin/tailwindcss #{url}"
+    system! "chmod +x bin/tailwindcss"
+  end
+
   # puts "\n== Copying sample files =="
   # unless File.exist?("config/database.yml")
   #   FileUtils.cp "config/database.yml.sample", "config/database.yml"
