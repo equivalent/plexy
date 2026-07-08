@@ -10,6 +10,7 @@ A vibe-coded demo app — nothing serious here. It exists to try out
 - Rails 8.1 / Ruby 4.0, PostgreSQL
 - [pgbus](https://pgbus.zoolutions.llc) — PGMQ-backed ActiveJob adapter + event bus (replaces Solid Queue)
 - [Phlex](https://www.phlex.fun) views with the [daisyui](https://daisyui.phlex.fun) component gem
+- [phlex-reactive](https://github.com/mhenrixon/phlex-reactive) — reactive Phlex components (the other thing this demo is here to try)
 - Tailwind CSS v4 via [tailwind-cli-extra](https://github.com/dobicinaitis/tailwind-cli-extra) (DaisyUI bundled)
 - Hotwire (Turbo/Stimulus), importmaps, no JS bundler
 
