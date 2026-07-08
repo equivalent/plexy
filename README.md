@@ -1,7 +1,8 @@
 # Plexy
 
 A vibe-coded demo app — nothing serious here. It exists to try out
-[pgbus](https://pgbus.zoolutions.llc) and PhlexReactive in a real-ish Rails app
+[pgbus](https://pgbus.zoolutions.llc) and
+[phlex-reactive](https://github.com/mhenrixon/phlex-reactive) in a real-ish Rails app
 (a tiny drum shop with products and a single-session shopping cart).
 
 ## Stack
