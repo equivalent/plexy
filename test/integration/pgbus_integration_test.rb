@@ -22,6 +22,12 @@ class PgbusIntegrationTest < ActionDispatch::IntegrationTest
     end
   end
 
+  setup do
+    # Installs the pgmq schema and creates the queue if missing, so tests pass
+    # in any order on a freshly prepared test database.
+    Pgbus::Testing.disabled! { Pgbus.client.ensure_queue("default") }
+  end
+
   teardown do
     Pgbus::Testing.disabled! { Pgbus.client.purge_queue("default") }
   end
@@ -60,7 +66,8 @@ class PgbusIntegrationTest < ActionDispatch::IntegrationTest
       Pgbus.publish("plexy.test.ping", { ok: true })
     end
 
+    # Fake mode captures the payload as passed (symbol keys, no JSON round-trip).
     event = pgbus_published_events(routing_key: "plexy.test.ping").sole
-    assert_equal({ "ok" => true }, event.payload)
+    assert_equal({ ok: true }, event.payload)
   end
 end
