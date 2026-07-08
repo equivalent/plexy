@@ -39,17 +39,23 @@ The plain `tailwindcss-ruby` binary does NOT include the DaisyUI plugin. We use
 
 ### DaisyUI caveats
 
-- **Absolute `@source` path**: `application.css` has an `@source` line pointing at the daisyui gem directory (rbenv path, includes the gem version). It must be updated whenever the gem version or Ruby version changes, and it's machine-specific. Check `bundle show daisyui` if DaisyUI modifier classes stop appearing.
+- **Gem `@source` via symlink**: `application.css` scans the daisyui gem through the gitignored symlink `vendor/daisyui-src` (created by `bin/setup` and the Dockerfile, pointing at `bundle show daisyui`). If DaisyUI modifier classes stop appearing, the symlink is missing or stale — recreate it with `ln -sfn "$(bundle show daisyui)" vendor/daisyui-src`.
 - **`@source inline(...)` safelist is required**: the gem declares base classes as Ruby symbols (`self.component_class = :btn`), which Tailwind's scanner cannot extract (leading `:` is rejected as invalid variant syntax). Without the safelist, `.btn`, `.card`, etc. are never emitted and components render unstyled. The safelist in `application.css` lists all `component_class` values; if a gem update adds new components, regenerate it with:
   `grep -rh "component_class = :" $(bundle show daisyui)/lib/ | sed 's/.*= ://' | sort -u`
 - **Tailwind utility classes in Ruby**: Tailwind v4 auto-scans project files (including `.rb`), so utility classes written in components (`class: "w-96 shadow-sm"`) are picked up — but only for literal strings. Don't build class names by string interpolation.
 - After changing components/views, verify styles with `bin/rails tailwindcss:build` and grep `app/assets/builds/tailwind.css` for the expected class — a class present in HTML but missing from the build means a scanning gap.
 
-## Deploy caveat (unresolved)
+## Deployment (Kamal)
 
-`config/deploy.yml` (Kamal) and the `Dockerfile` still assume the original SQLite setup:
-- The Dockerfile does not download the **linux** tailwind-cli-extra binary, so `assets:precompile` in the image build will fail until that step is added.
-- No Postgres accessory/external DB is configured for Kamal.
+Deployed with Kamal to **deploy.ahow.app**, served at **https://plexy.eq8.eu** (kamal-proxy terminates SSL via Let's Encrypt; `assume_ssl`/`force_ssl` are on in `production.rb`, with `/up` excluded from the https redirect for proxy health checks).
+
+- **Postgres** runs as the Kamal accessory `db` (`postgres:18`) on the same host. App containers reach it as `plexy-db` (set via `DB_HOST` in `config/deploy.yml`); `database.yml` reads `DB_HOST` (defaults to localhost). The data directory mounts `/var/lib/postgresql` — NOT `/var/lib/postgresql/data`, which the postgres:18 image no longer uses. Manage it with `bin/kamal accessory <boot|logs|details> db`.
+- **Secrets**: `.kamal/secrets` expects `PLEXY_DATABASE_PASSWORD` exported in the deployer's shell (used both for the app's DB connection and as the accessory's `POSTGRES_PASSWORD`); `RAILS_MASTER_KEY` comes from `config/master.key`.
+- **Roles**: `web` (Thruster/Puma) and `job` (`bin/pgbus start`) — both on deploy.ahow.app.
+- **Dockerfile** installs `libpq` (build + runtime), downloads the linux tailwind-cli-extra binary (version pinned, keep in sync with `bin/setup`), and recreates the `vendor/daisyui-src` symlink before `assets:precompile`.
+- The registry is `localhost:5555` (local registry, expected to be tunnelled/available at deploy time).
+- First deploy: DNS for plexy.eq8.eu must point at deploy.ahow.app; boot the accessory (`bin/kamal accessory boot db`) before `bin/kamal setup`/`deploy`. The entrypoint runs `db:prepare`, which creates the cache/cable databases and runs migrations (pgmq/pgbus is installed by migration — embedded mode).
+- **Warning**: the `/pgbus` dashboard has no authentication yet and will be publicly reachable once deployed — add auth before (or at) first deploy.
 
 ## Dev workflow
 

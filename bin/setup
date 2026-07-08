@@ -15,6 +15,11 @@ FileUtils.chdir APP_ROOT do
   puts "== Installing dependencies =="
   system("bundle check") || system!("bundle install")
 
+  # Stable symlink to the daisyui gem so Tailwind's @source directive in
+  # app/assets/tailwind/application.css works on any machine.
+  daisyui_path = `bundle show daisyui`.strip
+  FileUtils.ln_sf(daisyui_path, "vendor/daisyui-src") unless daisyui_path.empty?
+
   # TailwindCSS standalone CLI bundled with DaisyUI (see config/boot.rb).
   # https://github.com/dobicinaitis/tailwind-cli-extra
   unless File.exist?("bin/tailwindcss")

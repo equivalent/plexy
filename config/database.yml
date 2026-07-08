@@ -37,6 +37,7 @@ production:
   primary: &primary_production
     <<: *default
     database: plexy_production
+    host: <%= ENV.fetch("DB_HOST", "localhost") %>
     username: plexy
     password: <%= ENV["PLEXY_DATABASE_PASSWORD"] %>
   cache:

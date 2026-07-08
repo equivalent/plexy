@@ -16,7 +16,7 @@ WORKDIR /rails
 
 # Install base packages
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y curl libjemalloc2 libvips sqlite3 && \
+    apt-get install --no-install-recommends -y curl libjemalloc2 libpq5 libvips && \
     ln -s /usr/lib/$(uname -m)-linux-gnu/libjemalloc.so.2 /usr/local/lib/libjemalloc.so && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
@@ -32,7 +32,7 @@ FROM base AS build
 
 # Install packages needed to build gems
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y build-essential git libvips libyaml-dev pkg-config && \
+    apt-get install --no-install-recommends -y build-essential git libpq-dev libvips libyaml-dev pkg-config && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
 # Install application gems
@@ -50,6 +50,17 @@ COPY . .
 # Precompile bootsnap code for faster boot times.
 # -j 1 disable parallel compilation to avoid a QEMU bug: https://github.com/rails/bootsnap/issues/495
 RUN bundle exec bootsnap precompile -j 1 app/ lib/
+
+# bin/tailwindcss (tailwind-cli-extra: TailwindCSS bundled with DaisyUI) is
+# gitignored, so it is not in the build context — download the linux build.
+# Keep the version in sync with bin/setup.
+ARG TAILWIND_CLI_EXTRA_VERSION=2.9.4
+RUN curl -sL -o bin/tailwindcss "https://github.com/dobicinaitis/tailwind-cli-extra/releases/download/v${TAILWIND_CLI_EXTRA_VERSION}/tailwindcss-extra-linux-$(dpkg --print-architecture | sed 's/^amd64$/x64/')" && \
+    chmod +x bin/tailwindcss
+
+# Recreate the daisyui gem symlink used by Tailwind's @source directive
+# (the one from the build context points at a host-specific path).
+RUN ln -sfn "$(bundle show daisyui)" vendor/daisyui-src
 
 # Precompiling assets for production without requiring secret RAILS_MASTER_KEY
 RUN SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile

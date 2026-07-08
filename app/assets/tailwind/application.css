@@ -4,8 +4,9 @@
 @plugin "daisyui";
 
 /* Scan the DaisyUI gem's Phlex components for Tailwind/DaisyUI classes.
-   Update this path when the gem version changes (see `bundle show daisyui`). */
-@source "/Users/t/.rbenv/versions/4.0.5/lib/ruby/gems/4.0.0/gems/daisyui-1.2.1/**/*.rb";
+   vendor/daisyui-src is a symlink to the installed gem, maintained by
+   bin/setup (and the Dockerfile) so this path stays machine-independent. */
+@source "../../../vendor/daisyui-src/**/*.rb";
 
 /* Safelist the DaisyUI base component classes. The gem declares them as Ruby
    symbols (`component_class = :btn`), which Tailwind's scanner can't extract,

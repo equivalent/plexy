@@ -39,3 +39,6 @@
 
 # Ignore the tailwind-cli-extra binary (~80MB, downloaded by bin/setup).
 /bin/tailwindcss
+
+# Machine-specific symlink to the daisyui gem (created by bin/setup).
+/vendor/daisyui-src
