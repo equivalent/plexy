@@ -1,7 +1,7 @@
 # Name of your application. Used to uniquely configure containers.
 service: plexy
 
-# Name of the container image (use your-user/app-name on external registries).
+# Name of the container image.
 image: plexy
 
 # Deploy to these servers.
@@ -14,24 +14,15 @@ servers:
       - deploy.ahow.app
     cmd: bin/pgbus start
 
-# SSL auto certification via Let's Encrypt, terminated by kamal-proxy.
-# Requires config.assume_ssl and config.force_ssl in production.rb (enabled)
-# and DNS for plexy.eq8.eu pointing at deploy.ahow.app.
+# kamal-proxy terminates TLS (auto Let's Encrypt) and forwards HTTP to the app.
+# Requires config.assume_ssl and config.force_ssl in production.rb.
 proxy:
   ssl: true
   host: plexy.eq8.eu
 
 # Where you keep your container images.
 registry:
-  # Alternatives: hub.docker.com / registry.digitalocean.com / ghcr.io / ...
   server: localhost:5555
-
-  # Needed for authenticated registries.
-  # username: your-user
-
-  # Always use an access token rather than real password when possible.
-  # password:
-  #   - KAMAL_REGISTRY_PASSWORD
 
 # Inject ENV variables into containers (secrets come from .kamal/secrets).
 env:
@@ -43,49 +34,26 @@ env:
     # network under <service>-<accessory> = plexy-db.
     DB_HOST: plexy-db
 
-    # Set number of cores available to the application on each server (default: 1).
-    # WEB_CONCURRENCY: 2
-
-    # Log everything from Rails
-    # RAILS_LOG_LEVEL: debug
-
-# Aliases are triggered with "bin/kamal <alias>". You can overwrite arguments on invocation:
-# "bin/kamal logs -r job" will tail logs from the first server in the job section.
+# Aliases are triggered with "bin/kamal <alias>".
 aliases:
-  console: app exec --interactive --reuse "bin/rails console"
-  shell: app exec --interactive --reuse "bash"
+  rc: app exec --interactive --reuse "bin/rails console"
+  sh: app exec --interactive --reuse "bash"
   logs: app logs -f
   dbc: app exec --interactive --reuse "bin/rails dbconsole --include-password"
 
-# Use a persistent storage volume for local Active Storage files.
-# Recommended to change this to a mounted volume path that is backed up off server.
+# Persistent volume for local Active Storage files.
+# Back this up off-server.
 volumes:
-  - "plexy_storage:/rails/storage"
+  - "/root/plexy_storage:/rails/storage"
 
-# Bridge fingerprinted assets, like JS and CSS, between versions to avoid
-# hitting 404 on in-flight requests. Combines all files from new and old
-# version inside the asset_path.
+# Bridge fingerprinted assets between versions to avoid 404s on in-flight requests.
 asset_path: /rails/public/assets
 
 # Configure the image builder.
 builder:
   arch: amd64
 
-  # # Build image via remote server (useful for faster amd64 builds on arm64 computers)
-  # remote: ssh://docker@docker-builder-server
-  #
-  # # Pass arguments and secrets to the Docker build process
-  # args:
-  #   RUBY_VERSION: 4.0.5
-  # secrets:
-  #   - GITHUB_TOKEN
-  #   - RAILS_MASTER_KEY
-
-# Use a different ssh user than root
-# ssh:
-#   user: app
-
-# Use accessory services (secrets come from .kamal/secrets).
+# Accessory services (secrets come from .kamal/secrets).
 accessories:
   db:
     # Keep the major version in sync with the Postgres used in development.
@@ -103,4 +71,4 @@ accessories:
     directories:
       # The postgres:18 image moved its data mount point up to /var/lib/postgresql
       # (mounting the old /var/lib/postgresql/data subdir no longer persists data).
-      - data:/var/lib/postgresql
+      - /root/plexy_db_data:/var/lib/postgresql

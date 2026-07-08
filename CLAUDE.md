@@ -18,4 +18,4 @@ Rails 8.1.3 / Ruby 4.0.5. PostgreSQL, importmaps + Hotwire (no JS bundler), Prop
 
 - `bin/setup` — full setup; `bin/dev` — Puma + Tailwind watcher + pgbus worker.
 - `bin/rails test` — test suite.
-- `bin/kamal deploy` — deploy (Postgres runs as Kamal accessory `db`; secrets need `PLEXY_DATABASE_PASSWORD` in shell).
+- `bin/kamal deploy` — deploy `main` to deploy.ahow.app → https://plexy.eq8.eu (Postgres runs as Kamal accessory `db`; secrets need `PLEXY_DATABASE_PASSWORD` in shell). Sanity-check after: `curl https://plexy.eq8.eu/up` → 200. Aliases: `bin/kamal logs`, `rc` (Rails console), `sh` (shell), `dbc`.
