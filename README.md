@@ -23,5 +23,7 @@ bin/rails test   # test suite
 
 The pgbus dashboard is mounted at `/pgbus` in development.
 
-See [CLAUDE.md](CLAUDE.md) for architecture notes and setup caveats
-(DaisyUI/Tailwind quirks, pgbus embedded-mode pgmq schema, etc.).
+## Disclaimer
+
+Everything in this repo is vibecoded — I just wanted to try out
+[phlex-reactive](https://github.com/mhenrixon/phlex-reactive) as quickly as possible.
