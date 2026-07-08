@@ -7,9 +7,26 @@ Rails 8.1.3 app on Ruby 4.0.5 (rbenv). No JS bundler — importmaps + Hotwire (T
 - **Database**: PostgreSQL (`pg` gem). Local DBs: `plexy_development` / `plexy_test`. Production uses a multi-database layout (`primary` + `cache`/`cable` for the Solid gems) and expects `PLEXY_DATABASE_PASSWORD` or `DATABASE_URL`.
 - **Background jobs**: [pgbus](https://pgbus.zoolutions.llc) (PGMQ-backed ActiveJob adapter + event bus), replacing Solid Queue. Configured in `config/initializers/pgbus.rb`; adapter set in `config/application.rb`. Workers run via `bin/pgbus start` (a `jobs` process in `Procfile.dev`). Dashboard mounted at `/pgbus` (needs auth before production exposure). The pgmq schema was installed by the pgbus migration in **embedded mode** (Homebrew Postgres has no pgmq extension) — it lives in the dev DB but is NOT in `schema.rb`, so the test DB has no pgmq schema; tests therefore use the `:test` ActiveJob adapter (`config/environments/test.rb`) and `Pgbus::Testing::MinitestHelpers` fake mode (`test/test_helper.rb`). A fresh database needs `bin/rails db:migrate` (not just schema load) to get pgmq installed.
 - **Views**: Phlex (`phlex-rails`), not ERB. Components live in `app/components/` under the `Components::` namespace (a `Phlex::Kit`); full pages live in `app/views/` under `Views::`. Both namespaces are registered in `config/initializers/phlex.rb`. Base classes: `Components::Base` (< `Phlex::HTML`) and `Views::Base` (< `Components::Base`).
+- **Reactive components**: [phlex-reactive](https://phlex-reactive.zoolutions.llc) — Livewire-style interactive Phlex components. **Preferred approach for ALL interactive UI in this project** — see the dedicated section below.
 - **UI components**: `daisyui` gem (DaisyUI components as Phlex classes, docs: https://daisyui.phlex.fun). `DaisyUI` is included in `Components::Base`, so short-form syntax works everywhere: `Button(:primary) { "Save" }`, `Card(:base_100) { |card| card.body { ... } }`.
 - **CSS**: Tailwind v4 (CSS-based config in `app/assets/tailwind/application.css` — there is no `tailwind.config.js`) via `tailwindcss-rails`.
 - Controllers render Phlex views directly: `render Views::Pages::Landing.new`. Root route is `pages#landing`.
+
+## phlex-reactive (use it heavily)
+
+This project uses [phlex-reactive](https://phlex-reactive.zoolutions.llc) for interactive UI, and it should be the **default choice** for anything interactive: prefer a reactive component over hand-rolled Stimulus controllers, custom Turbo Stream templates, or dedicated controller actions. Only drop to raw Stimulus for purely client-side behavior with no server state.
+
+How it works: one generic endpoint (`POST /reactive/actions`, mounted by the engine — zero routing per component) receives a signed identity token + action name, rebuilds the component server-side, runs the whitelisted action, and returns an auto-targeted Turbo Stream that morphs the component in place.
+
+Conventions here:
+
+- Reactive components live in `app/components/` like any other component, inherit `Components::Base`, and `include Phlex::Reactive::Component`. Reference example: `Components::Counter` (`app/components/counter.rb`), rendered on the landing page.
+- **State-backed** (`reactive_state :foo`): state rides in the signed token — for ephemeral UI state. **Record-backed** (`reactive_record :foo`): the token carries a GlobalID, the record is re-found from the DB on every action, and actions persist directly (`@record.update!(...)`) — the DB *is* the state. Prefer record-backed whenever the data lives in a model.
+- Declare every invokable method with `action :name` (+ `params:` schema for coercion); wire buttons/inputs with `on(:name)` inside a `reactive_root` element.
+- **Authorization is fail-closed**: a mutating action that never calls an authorization method raises and rolls back. Call `authorize!`/`mark_authorized!` in the action, or declare `skip_verify_authorized` on genuinely public components (the app has no auth yet, so components currently use `skip_verify_authorized` — revisit when auth lands, along with `Phlex::Reactive.base_controller_name = "ApplicationController"` in the initializer).
+- Broadcasting (cross-tab live updates) and deferred replies run over **pgbus** (auto-detected; the `realtime` capsule in `config/initializers/pgbus.rb` drains the broadcast queue). Use `Component.broadcast_to(...)` after saves that other sessions should see.
+- Config lives in `config/initializers/phlex_reactive.rb` (all defaults currently). After adding/changing reactive components, run `bin/rails phlex_reactive:doctor` — it verifies routes, JS registration, stable `#id`s, action methods, and authorization intent.
+- Flash replies (`reply.replace.flash(...)`) are sent but not yet rendered — the layout has no flash container.
 
 ## Tailwind + DaisyUI setup (read before touching CSS)
 
