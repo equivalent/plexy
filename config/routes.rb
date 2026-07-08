@@ -1,6 +1,9 @@
 Rails.application.routes.draw do
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
+  # Icon browser for the synced rails_icons libraries (dev-only, no auth)
+  mount RailsIcons::Engine, at: "/rails_icons" if Rails.env.development?
+
   # Pgbus job/event dashboard. NOTE: add authentication before exposing this in production.
   mount Pgbus::Engine => "/pgbus"
 

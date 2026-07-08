@@ -28,6 +28,11 @@ gem "daisyui"
 # Livewire-style reactive Phlex components [https://phlex-reactive.zoolutions.llc]
 gem "phlex-reactive"
 
+# SVG icons as Phlex components, e.g. `LucideIcon(:house)` [https://github.com/mhenrixon/glyphs]
+gem "glyphs"
+# Icon syncing for glyphs (`rails generate rails_icons:sync`); must be required explicitly
+gem "rails_icons"
+
 # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
 # gem "bcrypt", "~> 3.1.7"
 

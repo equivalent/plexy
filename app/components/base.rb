@@ -7,6 +7,9 @@ class Components::Base < Phlex::HTML
   # Short-form DaisyUI components, e.g. `Button(:primary) { "Save" }`
   include DaisyUI
 
+  # SVG icon components, e.g. `LucideIcon(:house, class: "size-4")`
+  include Glyphs
+
   if Rails.env.development?
     def before_template
       comment { "Before #{self.class.name}" }
