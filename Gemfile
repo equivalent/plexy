@@ -25,6 +25,9 @@ gem "phlex-rails"
 # DaisyUI components for Phlex [https://daisyui.phlex.fun]
 gem "daisyui"
 
+# Livewire-style reactive Phlex components [https://phlex-reactive.zoolutions.llc]
+gem "phlex-reactive"
+
 # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
 # gem "bcrypt", "~> 3.1.7"
 
