@@ -5,6 +5,7 @@
 # params, plus a few reply.* styles.
 class Components::Counter < Components::Base
   include Phlex::Reactive::Component
+  include Components::Storefront
 
   # Public demo component with no user-scoped data — nothing to authorize.
   skip_verify_authorized
@@ -22,18 +23,25 @@ class Components::Counter < Components::Base
 
   def id = "counter"
 
-  def increment = @count += 1
-  def decrement = @count -= 1
-  def set(count:) = @count = count
+  def increment = broadcast_count { @count += 1 }
+  def decrement = broadcast_count { @count -= 1 }
+  def set(count:) = broadcast_count { @count = count }
 
   def reset_with_flash
-    @count = 0
+    broadcast_count { @count = 0 }
     reply.replace.flash(:notice, "Reset")
   end
 
   def bump_via_morph
-    @count += 1
+    broadcast_count { @count += 1 }
     reply.morph
+  end
+
+  # Counter state lives in each tab's signed token, so peers just mirror the
+  # actor's latest count (last writer wins) — enough for the cross-tab demo.
+  private def broadcast_count
+    yield
+    broadcast_replace_to_peers(Components::Counter.new(count: @count))
   end
 
   def view_template

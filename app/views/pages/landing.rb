@@ -1,11 +1,18 @@
 # frozen_string_literal: true
 
 class Views::Pages::Landing < Views::Base
+  include Phlex::Rails::Helpers::TurboStreamFrom
+
   def initialize(products:)
     @products = products
   end
 
   def view_template
+    # Subscribe every tab to the storefront stream (pgbus patches this helper
+    # to render an SSE <pgbus-stream-source>). Reactive actions broadcast their
+    # updates here so peer tabs stay live — see Components::Storefront.
+    turbo_stream_from :storefront
+
     div(class: "flex flex-col items-center justify-center gap-8 py-12") do
       Alert(:info, :soft, class: "max-w-3xl") do
         LucideIcon(:info, class: "size-5 shrink-0")

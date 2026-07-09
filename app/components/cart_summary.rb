@@ -5,6 +5,7 @@
 # action empties the cart and re-renders the affected product cards back.
 class Components::CartSummary < Components::Base
   include Phlex::Reactive::Component
+  include Components::Storefront
 
   # Demo app has no auth yet — revisit when auth lands (see CLAUDE.md).
   skip_verify_authorized
@@ -16,6 +17,10 @@ class Components::CartSummary < Components::Base
   def clear_cart
     products = Current.cart.map(&:product)
     CartProduct.destroy_all
+    broadcast_replace_to_peers(
+      Components::CartSummary.new,
+      *products.map { |product| Components::ProductCard.new(product:) }
+    )
     products.reduce(reply.replace) do |response, product|
       response.also(Components::ProductCard.new(product:))
     end

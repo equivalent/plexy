@@ -2,6 +2,7 @@
 
 class Components::ProductCard < Components::Base
   include Phlex::Reactive::Component
+  include Components::Storefront
 
   # Demo app has no auth yet — revisit when auth lands (see CLAUDE.md).
   skip_verify_authorized
@@ -19,12 +20,12 @@ class Components::ProductCard < Components::Base
 
   def buy_now
     CartProduct.add(@product)
-    reply.replace.also(Components::CartSummary.new)
+    reply_and_broadcast
   end
 
   def increment
     CartProduct.add(@product)
-    reply.replace.also(Components::CartSummary.new)
+    reply_and_broadcast
   end
 
   def decrement
@@ -36,7 +37,7 @@ class Components::ProductCard < Components::Base
     else
       cart_product.destroy!
     end
-    reply.replace.also(Components::CartSummary.new)
+    reply_and_broadcast
   end
 
   def view_template
@@ -63,6 +64,16 @@ class Components::ProductCard < Components::Base
   end
 
   private
+
+  # Actor gets the reply; every other subscribed tab gets the same card +
+  # cart summary via the storefront stream.
+  def reply_and_broadcast
+    broadcast_replace_to_peers(
+      Components::ProductCard.new(product: @product),
+      Components::CartSummary.new
+    )
+    reply.replace.also(Components::CartSummary.new)
+  end
 
   def quantity_stepper(quantity)
     div(class: "flex items-center gap-3") do
