@@ -32,13 +32,6 @@ class Views::Pages::Landing < Views::Base
           render Components::ProductCard.new(product: product)
         end
       end
-
-      div(class: "card bg-base-100 shadow-md") do
-        div(class: "card-body items-center") do
-          h2(class: "card-title") { "Reactive counter" }
-          render Components::Counter.new
-        end
-      end
     end
   end
 end
