@@ -6,7 +6,7 @@ class Views::Pages::Landing < Views::Base
   end
 
   def view_template
-    div(class: "min-h-screen flex flex-col items-center justify-center gap-8 bg-base-200 py-12") do
+    div(class: "flex flex-col items-center justify-center gap-8 py-12") do
       Alert(:info, :soft, class: "max-w-3xl") do
         LucideIcon(:info, class: "size-5 shrink-0")
         span do
