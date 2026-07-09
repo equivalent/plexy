@@ -7,6 +7,17 @@ class Views::Pages::Landing < Views::Base
 
   def view_template
     div(class: "min-h-screen flex flex-col items-center justify-center gap-8 bg-base-200 py-12") do
+      Alert(:info, :soft, class: "max-w-3xl") do
+        LucideIcon(:info, class: "size-5 shrink-0")
+        span do
+          plain "This is a vibe-coded demo project, built just to test out the capabilities of "
+          a(href: "https://github.com/mhenrixon/phlex-reactive", target: "_blank", rel: "noopener", class: "link") { "phlex-reactive" }
+          plain ". You can check out the source code on "
+          a(href: Components::GithubLink::REPO_URL, target: "_blank", rel: "noopener", class: "link") { "GitHub" }
+          plain "."
+        end
+      end
+
       render Components::CartSummary.new
 
       div(class: "flex flex-wrap justify-center gap-8 max-w-6xl") do

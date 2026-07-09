@@ -11,6 +11,7 @@ A vibe-coded demo app — nothing serious here. It exists to try out
 - [pgbus](https://pgbus.zoolutions.llc) — PGMQ-backed ActiveJob adapter + event bus (replaces Solid Queue)
 - [Phlex](https://www.phlex.fun) views with the [daisyui](https://daisyui.phlex.fun) component gem
 - [phlex-reactive](https://github.com/mhenrixon/phlex-reactive) — reactive Phlex components (the other thing this demo is here to try)
+- [glyphs](https://github.com/mhenrixon/glyphs) — SVG icons (Lucide, Heroicons) as Phlex components
 - Tailwind CSS v4 via [tailwind-cli-extra](https://github.com/dobicinaitis/tailwind-cli-extra) (DaisyUI bundled)
 - Hotwire (Turbo/Stimulus), importmaps, no JS bundler
 
